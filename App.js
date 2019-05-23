@@ -8,20 +8,30 @@ import { StyleSheet,
          Platform,
          ScrollView
         } from 'react-native';
-import Todo from "./Todo"
-
+import { AppLoading } from "expo";
+import Todo from "./Todo";
+import uuidv1 from "uuid/v1";
 
 const { height, width } = Dimensions.get("window");
 
 export default class App extends React.Component {
   state = {
-    newTodo : ""  
+    newTodo : "",
+    loadedToDos : false,
+    toDos : {}
   };
+  componentDidMount = () => {
+    this._loadToDos();
+  }
   render() {
-    const { newTodo } = this.state;
+    const { newTodo, loadedToDos, toDos } = this.state;
+    console.log(toDos);
+    if(!loadedToDos){
+      return <AppLoading />
+    }
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content"></StatusBar>
+        <StatusBar barStyle="light-content"/>
         <Text style={styles.title}> Todo App </Text>
         <View style={styles.card}>
           <TextInput 
@@ -31,21 +41,53 @@ export default class App extends React.Component {
             onChangeText={this._controllNewTodo}
             placeholderTextColor = {"#999"}
             returnKeyType = {"done"}
-            autoCorrect = {false}  
+            autoCorrect = {false} 
+            onSubmitEditing={this._addToDo}
           />
           <ScrollView contentContainerStyle = {styles.toDos}>
-            <Todo/>
+            {Object.values(toDos).map(toDo => <ToDo key={toDo.id} {...toDo}/>)}
           </ScrollView>
         </View>
       </View>
 
     );
   }
-  _controllNewTodo = Text => {
+  _controllNewTodo = text => {
     this.setState({
       newTodo : text
     });
-  };
+  }
+  _loadToDos = () => {
+    this.setState({
+      loadedToDos : true
+    })
+  }
+  _addToDo = () => {
+    const { newTodo } = this.state;
+    if(newTodo !== ""){
+      this.setState(prevState => {
+        const ID = uuidv1();
+        const newToDoObject = {
+          [ID] : {
+            id : ID,
+            isCompleted : false,
+            text : newTodo,
+            createdAt : Date.now()
+          }
+        };
+        const newState = {
+          ...prevState,
+          newTodo : "",
+          toDos : {
+            ...prevState.toDos,
+            ...newToDoObject
+          }
+        }
+        return {...newState};
+      })
+    }
+
+  }
 }
 
 const styles = StyleSheet.create({

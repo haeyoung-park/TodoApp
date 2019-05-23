@@ -1,19 +1,30 @@
 import React, {Component} from "react";
-import {View, Text, TouchableOpacity, Dimensions,  StyleSheet} from "react-native";
+import {View,
+        Text, 
+        TouchableOpacity, 
+        Dimensions,  
+        StyleSheet,
+        TextInput
+} from "react-native";
 
 const { width, height } = Dimensions.get("window");  
+
 
 export default class Todo extends Component{
     state = {
         isEditing : false,
-        isCompleted : false
+        isCompleted : false,
+        toDoValue : ""
+        
     };
     render() {
-        const {isCompleted, isEditing} = this.state;
+        const {isCompleted, isEditing, toDoValue } = this.state;
+        const { text } = this.props;
+
         return (
             <View style = {styles.container}>
                 <View style= {styles.colum}>
-                    <TouchableOpacity opPress={this._toggleComplete}>
+                    <TouchableOpacity onPress={this._toggleComplete}>
                         <View 
                             style = {[
                                 styles.circle, 
@@ -21,15 +32,30 @@ export default class Todo extends Component{
                             ]}>
                         </View>
                     </TouchableOpacity>
-                    <Text style={[styles.text, 
-                                isCompleted ? styles.completedText : styles.uncompletedText]}>
-                                Hello I'm a To DO
+                    {isEditing ? (
+                        <TextInput 
+                            style={[
+                                styles.text,
+                                styles.input,
+                                isCompleted > styles.completedText : styles.uncompletedText
+                            ]} 
+                            value = {toDoValue}
+                            multiline = {true}
+                            onChangeText = {this._controllInput}
+                            returnKeyType={"done"}
+                            onBlur = {this._finishEditing}
+                        />
+                    ) : (
+                        <Text style={[
+                            styles.text, 
+                            isCompleted ? styles.completedText : styles.uncompletedText]}>
+                        {text}
                     </Text>
+                    )}
                 </View>
-                
                     {isEditing ? (
                         <View style={styles.actions}>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPressOut = {this._finishEditing}>
                                 <View srtyle= {styles.actionConatainer}>
                                     <Text style = {styles.actionText}>
                                         Check
@@ -56,20 +82,32 @@ export default class Todo extends Component{
                         </View>
 
                     )}
-                </View>
+            </View>
            
         );
     }
     _toggleComplete = () => { 
         this.setState(prevState => { 
-            return{
+            return({
                 isCompleted : !prevState.isCompleted
-            };
+            });
         }); 
     };
     _startEditing = () => {
+        const { text } = this.props;
         this.setState({
-            isEditing : true
+            isEditing : true,
+            toDoValue : text
+        });
+    }
+    _finishEditing = () => {
+        this.setState({
+            isEditing : false
+        })
+    }
+    _controllInput = (text) => {
+        this.setState({
+            toDoValue : text
         })
     }
 }
@@ -79,8 +117,7 @@ const styles = StyleSheet.create({
         borderBottomColor : "#bbb",
         borderBottomWidth : StyleSheet.hairlineWidth,
         flexDirection : "row",
-        alignItems : "center",
-        justifyContent : "space-between"
+        alignItems : "center"
     },
     circle : {
         width : 30, 
@@ -121,6 +158,10 @@ const styles = StyleSheet.create({
     actionConatainer : {
         marginVertical : 20,
         marginHorizontal : 20 
+    },
+    input : {
+        marginVertical : 20,
+        width : width /2
     }
 
 });
