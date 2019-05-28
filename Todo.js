@@ -7,6 +7,7 @@ import {View,
         TextInput
 } from "react-native";
 import PropTypes from "prop-types";
+import { prototype } from "stream";
 
 
 const { width, height } = Dimensions.get("window");  
@@ -22,8 +23,9 @@ export default class Todo extends Component{
         id : PropTypes.string.isRequired,
         text : PropTypes.string.isRequired,
         isCompleted : PropTypes.bool.isRequired,
-        deleteToDo  : PropTypes.func.isRequired
-        
+        deleteToDo  : PropTypes.func.isRequired,
+        completeToDo : PropTypes.func.isRequired,
+        uncompleteToDo : prototype.func.isRequired
     };
     state = {
         isEditing : false,
@@ -32,8 +34,8 @@ export default class Todo extends Component{
         
     };
     render() {
-        const {isCompleted, isEditing, toDoValue } = this.state;
-        const { text, id, deleteToDo } = this.props;
+        const { isEditing, toDoValue } = this.state;
+        const { text, id, deleteToDo, isCompleted } = this.props;
 
         return (
             <View style = {styles.container}>
@@ -99,11 +101,12 @@ export default class Todo extends Component{
         ); // return
     }
     _toggleComplete = () => { 
-        this.setState(prevState => { 
-            return({
-                isCompleted : !prevState.isCompleted
-            });
-        }); 
+       const { isCompleted, uncompleteToDo, completeToDo, id } = this.props;
+       if(isCompleted){
+            uncompleteToDo(id);
+       }else {
+           completeToDo(id);
+       }
     };
     _startEditing = () => {
         const { text } = this.props;
